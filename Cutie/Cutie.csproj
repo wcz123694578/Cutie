@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net472</TargetFramework>
+		<RootNamespace>Cutie</RootNamespace>
+		<AssemblyName>Cutie</AssemblyName>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+	<ItemGroup>
+	  <PackageReference Include="ModelContextProtocol" Version="2.2.0" />
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+	  <PackageReference Include="Melanchall.DryWetMidi.Nativeless" Version="8.0.3" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="ScriptPortal.Vegas">
+			<HintPath>..\..\..\..\Program Files\VEGAS\VEGAS Pro 18.0\ScriptPortal.Vegas.dll</HintPath>
+		</Reference>
+		<Reference Include="System.Windows.Forms" />
+	</ItemGroup>
+</Project>

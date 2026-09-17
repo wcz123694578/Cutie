@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Cutie": {
+      "commandName": "Project"
+    },
+    "配置文件 1": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\VEGAS\\VEGAS Pro 18.0\\vegas180.exe"
+    }
+  }
+}

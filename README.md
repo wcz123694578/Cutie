@@ -1,0 +1,1 @@
+由于我图方便直接在脚本层面实现mcp，写完工具调用后去拉mcp aspnet的包才发现不支持.net standard，于是让gpt大人帮我写了一个httpserver。目前端口号是固定的，请在启动host的代码里看，之后我会写个配置的功能

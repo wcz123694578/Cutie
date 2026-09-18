@@ -11,11 +11,13 @@ namespace Cutie
     public class ProjectOutputTools
     {
         [McpServerTool, Description("Create a new empty active project. Refuses to discard unsaved changes.")]
+        [ToolExecution(ToolKind.External)]
         public object NewProject()
         {
             if (VegasToolSupport.Project.IsModified)
                 throw new InvalidOperationException("Save the modified active project before creating a new one.");
             var created = VegasContext.Current.NewProject(false, false);
+            if (!created) throw new InvalidOperationException("VEGAS did not create the project.");
             return new { created, filePath = VegasToolSupport.Project.FilePath,
                 trackCount = VegasToolSupport.Project.Tracks.Count };
         }
@@ -23,8 +25,22 @@ namespace Cutie
         private static Vegas _subscribedVegas;
         private static object _renderState;
         private static string _renderStatus;
+        private static Vegas _openVegas;
+        private static long _openRequest;
+        private static long _openCompleted;
+        private static string _openPath;
+
+        internal static bool IsOpenComplete(long request, string path) =>
+            _openCompleted == request && string.Equals(VegasToolSupport.Project.FilePath, path, StringComparison.OrdinalIgnoreCase);
+
+        private static void OnProjectOpened(object sender, EventArgs args)
+        {
+            if (string.Equals(VegasToolSupport.Project.FilePath, _openPath, StringComparison.OrdinalIgnoreCase))
+                _openCompleted = _openRequest;
+        }
 
         [McpServerTool, Description("Save the active project. An absolute path is required for an untitled project.")]
+        [ToolExecution(ToolKind.External)]
         public object SaveProject(string path = null)
         {
             var target = path ?? VegasToolSupport.Project.FilePath;
@@ -33,10 +49,13 @@ namespace Cutie
             target = Path.GetFullPath(target);
             if (!string.Equals(Path.GetExtension(target), ".veg", StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentException("Project path must have a .veg extension.");
-            return new { saved = VegasToolSupport.Project.SaveProject(target), path = target };
+            var saved = VegasToolSupport.Project.SaveProject(target);
+            if (!saved) throw new InvalidOperationException("VEGAS did not save the project.");
+            return new { saved, path = target };
         }
 
         [McpServerTool, Description("Open a .veg project. Refuses to replace a modified active project.")]
+        [ToolExecution(ToolKind.External)]
         public object OpenProject(string path)
         {
             if (string.IsNullOrWhiteSpace(path) || !Path.IsPathRooted(path) || !File.Exists(path) ||
@@ -44,11 +63,21 @@ namespace Cutie
                 throw new ArgumentException("An existing absolute .veg path is required.");
             if (VegasToolSupport.Project.IsModified)
                 throw new InvalidOperationException("Save the modified active project before opening another project.");
-            VegasContext.Current.OpenFile(Path.GetFullPath(path));
-            return new { opened = true, path = VegasToolSupport.Project.FilePath };
+            var vegas = VegasContext.Current;
+            if (!ReferenceEquals(_openVegas, vegas))
+            {
+                if (_openVegas != null) _openVegas.ProjectOpened -= OnProjectOpened;
+                _openVegas = vegas;
+                vegas.ProjectOpened += OnProjectOpened;
+            }
+            _openPath = Path.GetFullPath(path);
+            var request = ++_openRequest;
+            vegas.OpenFile(_openPath);
+            return new { opened = true, path = VegasToolSupport.Project.FilePath, requestedPath = _openPath, openRequest = request };
         }
 
         [McpServerTool, Description("List installed render templates. Use offset and limit to page results.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListRenderTemplates(int offset = 0, int limit = 100)
         {
             if (offset < 0 || limit < 1 || limit > 500) throw new ArgumentOutOfRangeException();
@@ -69,6 +98,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Start rendering with an installed template. Returns initial status; call get_render_status for progress. Times are milliseconds.")]
+        [ToolExecution(ToolKind.External)]
         public object RenderProject(string outputPath, uint rendererId, uint templateId,
             double? startMs = null, double? lengthMs = null, bool overwrite = false)
         {
@@ -122,6 +152,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Get latest render status from a render started through Cutie.")]
+        [ToolExecution(ToolKind.Read)]
         public object GetRenderStatus() => _renderState ?? new { status = "not_started" };
 
         private static void SubscribeToRenderEvents()

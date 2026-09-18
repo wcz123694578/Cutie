@@ -12,6 +12,7 @@ namespace Cutie
     public class GeneratorTools
     {
         [McpServerTool, Description("List enabled VEGAS video media generators and their unique IDs.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListGenerators(int limit = 100)
         {
             if (limit < 1 || limit > 500) throw new ArgumentOutOfRangeException(nameof(limit));
@@ -34,6 +35,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("List preset names for a VEGAS media generator by plugin ID.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListGeneratorPresets(string pluginId)
         {
             var node = FindGenerator(pluginId);
@@ -41,6 +43,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Create a generated media event on an existing video track. Times are milliseconds; presetName is optional.")]
+        [ToolExecution(ToolKind.Edit)]
         public object CreateGeneratedEvent(int trackIndex, string pluginId, double startMs,
             double lengthMs, string presetName = null)
         {
@@ -66,6 +69,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("List OFX parameters on a generated media event, including values and animation support.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListGeneratorParameters(int trackIndex, int eventIndex)
         {
             var generator = GetGenerator(trackIndex, eventIndex);
@@ -79,6 +83,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Set a generated media OFX parameter. Numeric vectors and RGB/RGBA colors use comma-separated components; optional atMs sets a keyframe.")]
+        [ToolExecution(ToolKind.Edit)]
         public object SetGeneratorParameter(int trackIndex, int eventIndex,
             string parameterName, string value, double? atMs = null)
         {

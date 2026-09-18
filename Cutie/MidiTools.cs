@@ -13,6 +13,7 @@ namespace Cutie
     public class MidiTools
     {
         [McpServerTool, Description("Place MIDI notes from one 1-based channel onto an existing VEGAS audio or video track. Audio events are pitch-shifted relative to baseNote; video events rotate source offsets. Times are milliseconds. selection is highest, lowest, or all notes at each onset.")]
+        [ToolExecution(ToolKind.Edit)]
         public object PlaceMidiNotes(string midiPath, uint mediaId, int trackIndex, int channel,
             double fromMs, double toMs, int baseNote = 55, string selection = "highest",
             int everyNth = 1, int maxEvents = 200, double maxLengthMs = 220)
@@ -77,6 +78,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Analyze a Standard MIDI File without changing the VEGAS project. Returns channel summaries and paged notes with tempo-aware millisecond times. Channels are 1-based.")]
+        [ToolExecution(ToolKind.Background)]
         public object AnalyzeMidi(string path, int offset = 0, int limit = 256, int? channel = null)
         {
             if (string.IsNullOrWhiteSpace(path) || !Path.IsPathRooted(path) || !File.Exists(path))

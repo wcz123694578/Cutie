@@ -11,6 +11,7 @@ namespace Cutie
     public class MediaTools
     {
         [McpServerTool, Description("List project media with IDs, paths, stream types, and duration in milliseconds.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListMedia()
         {
             return VegasToolSupport.Project.MediaPool.Cast<Media>()
@@ -18,6 +19,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Get media by its project media ID.")]
+        [ToolExecution(ToolKind.Read)]
         public object GetMedia(uint mediaId)
         {
             var media = VegasToolSupport.FindMedia(mediaId);
@@ -26,6 +28,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Import a local media file into the project media pool.")]
+        [ToolExecution(ToolKind.Edit)]
         public object ImportMedia(string path)
         {
             if (string.IsNullOrWhiteSpace(path) || !Path.IsPathRooted(path) || !File.Exists(path))
@@ -35,6 +38,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("List selected tracks, events, and project media by their current indices or IDs.")]
+        [ToolExecution(ToolKind.Read)]
         public object GetSelection()
         {
             var project = VegasToolSupport.Project;

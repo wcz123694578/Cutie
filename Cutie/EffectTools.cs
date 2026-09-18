@@ -12,6 +12,7 @@ namespace Cutie
     public class EffectTools
     {
         [McpServerTool, Description("List enabled video or audio effects by plugin unique ID. Limit defaults to 100.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListPlugins(string type, int limit = 100)
         {
             if (type != "video" && type != "audio") throw new ArgumentException("Type must be video or audio.");
@@ -20,12 +21,13 @@ namespace Cutie
             return Walk(root).Where(node => !node.IsContainer && !node.IsDisabled)
                 .Take(limit).Select(node => new
                 {
-                    uniqueId = node.UniqueID, name = node.Name, group = node.Group,
+                    uniqueId = node.UniqueID, name = node.Name, group = node.IsOFX ? node.Group : "(非OFX插件)",
                     isOfx = node.IsOFX, isVideo = node.IsVideo, isAudio = node.IsAudio
                 }).ToArray();
         }
 
         [McpServerTool, Description("List effects on a track or event. Event index is required for event target.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListEffects(string targetType, int trackIndex, int eventIndex = -1)
         {
             return ResolveEffects(targetType, trackIndex, eventIndex)
@@ -38,6 +40,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Add a video or audio effect to a track or event by plugin unique ID.")]
+        [ToolExecution(ToolKind.Edit)]
         public object AddEffect(string targetType, int trackIndex, string pluginId, int eventIndex = -1)
         {
             if (string.IsNullOrWhiteSpace(pluginId)) throw new ArgumentException("Plugin ID is required.");
@@ -56,6 +59,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Set an effect's bypass state or named preset.")]
+        [ToolExecution(ToolKind.Edit)]
         public object UpdateEffect(string targetType, int trackIndex, int effectIndex,
             int eventIndex = -1, bool? bypass = null, string presetName = null)
         {
@@ -70,6 +74,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Remove an effect by its current zero-based index.")]
+        [ToolExecution(ToolKind.Edit)]
         public object RemoveEffect(string targetType, int trackIndex, int effectIndex, int eventIndex = -1)
         {
             return VegasToolSupport.Edit("Remove effect", () =>
@@ -82,6 +87,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("List OFX parameters for a track or event effect, including current values and choices.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListEffectParameters(string targetType, int trackIndex, int effectIndex, int eventIndex = -1)
         {
             var effect = GetEffect(targetType, trackIndex, eventIndex, effectIndex);
@@ -95,6 +101,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Set a Boolean, numeric, string, or choice OFX parameter. Value is text; optional atMs sets a keyframe.")]
+        [ToolExecution(ToolKind.Edit)]
         public object SetEffectParameter(string targetType, int trackIndex, int effectIndex,
             string parameterName, string value, int eventIndex = -1, double? atMs = null)
         {
@@ -207,7 +214,7 @@ namespace Cutie
             return effects[effectIndex];
         }
 
-        private static Effects ResolveEffects(string targetType, int trackIndex, int eventIndex)
+        internal static Effects ResolveEffects(string targetType, int trackIndex, int eventIndex)
         {
             if (targetType == "track") return VegasToolSupport.Track(trackIndex).Effects;
             if (targetType == "event")

@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="Cutie/Cutie.csproj" />
+  <Project Path="tests/Cutie.BatchTests/Cutie.BatchTests.csproj" />
 </Solution>

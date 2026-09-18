@@ -6,6 +6,35 @@ namespace Cutie
 {
     internal static class VegasToolSupport
     {
+        [ThreadStatic] private static BatchUndoScope _batchUndo;
+
+        private sealed class BatchUndoScope : IDisposable
+        {
+            private readonly UndoBlock _undo;
+            internal readonly Project Project;
+            internal BatchUndoScope(string label)
+            {
+                Project = VegasToolSupport.Project;
+                _undo = new UndoBlock(Project, label);
+            }
+            public void Dispose()
+            {
+                try { _undo.Dispose(); }
+                finally { _batchUndo = null; }
+            }
+        }
+
+        internal static IDisposable BeginBatchUndo(string label)
+        {
+            if (_batchUndo != null) throw new InvalidOperationException("Nested batch undo scopes are not supported.");
+            return _batchUndo = new BatchUndoScope(label);
+        }
+
+        internal static T ReadWithUndo<T>(string label, Func<T> action)
+        {
+            if (_batchUndo != null) return action();
+            using (var undo = new UndoBlock(Project, label)) return action();
+        }
         public static Project Project => VegasContext.Current?.Project
             ?? throw new InvalidOperationException("No active VEGAS project.");
 
@@ -56,6 +85,11 @@ namespace Cutie
 
         public static T Edit<T>(string label, Func<T> action)
         {
+            if (_batchUndo != null)
+            {
+                if (!Equals(_batchUndo.Project, Project)) throw new InvalidOperationException("Project changed during batch editing.");
+                return action();
+            }
             using (var undo = new UndoBlock(Project, label))
             {
                 try

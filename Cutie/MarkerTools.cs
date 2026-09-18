@@ -10,6 +10,7 @@ namespace Cutie
     public class MarkerTools
     {
         [McpServerTool, Description("List project timeline markers and regions. Times are milliseconds.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListMarkers()
         {
             var project = VegasToolSupport.Project;
@@ -28,6 +29,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Add a timeline marker at a position in milliseconds.")]
+        [ToolExecution(ToolKind.Edit)]
         public object AddMarker(double positionMs, string label = null)
         {
             return VegasToolSupport.Edit("Add marker", () =>
@@ -40,6 +42,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Update a marker at its current zero-based index.")]
+        [ToolExecution(ToolKind.Edit)]
         public object UpdateMarker(int index, double? positionMs = null, string label = null)
         {
             return VegasToolSupport.Edit("Update marker", () =>
@@ -53,6 +56,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Delete a marker at its current zero-based index.")]
+        [ToolExecution(ToolKind.Edit)]
         public object DeleteMarker(int index)
         {
             return VegasToolSupport.Edit("Delete marker", () =>
@@ -63,6 +67,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Add a timeline region. Start and length are milliseconds.")]
+        [ToolExecution(ToolKind.Edit)]
         public object AddRegion(double startMs, double lengthMs, string label = null)
         {
             if (lengthMs <= 0) throw new ArgumentException("Length must be positive.");
@@ -77,6 +82,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Update a region at its current zero-based index. Times are milliseconds.")]
+        [ToolExecution(ToolKind.Edit)]
         public object UpdateRegion(int index, double? startMs = null, double? lengthMs = null, string label = null)
         {
             if (lengthMs.HasValue && lengthMs.Value <= 0) throw new ArgumentException("Length must be positive.");
@@ -93,6 +99,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Delete a region at its current zero-based index.")]
+        [ToolExecution(ToolKind.Edit)]
         public object DeleteRegion(int index)
         {
             return VegasToolSupport.Edit("Delete region", () =>

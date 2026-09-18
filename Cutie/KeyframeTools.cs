@@ -12,6 +12,7 @@ namespace Cutie
     public class KeyframeTools
     {
         [McpServerTool, Description("List interpolation types supported by VEGAS 18 for OFX and video motion keyframes.")]
+        [ToolExecution(ToolKind.Background)]
         public object ListKeyframeTypes() => new
         {
             ofx = Enum.GetNames(typeof(OFXInterpolationType)),
@@ -19,6 +20,7 @@ namespace Cutie
         };
 
         [McpServerTool, Description("List event Pan/Crop keyframes, including position, interpolation and bounds.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListPanCropKeyframes(int trackIndex, int eventIndex)
         {
             var video = VideoEvent(trackIndex, eventIndex);
@@ -29,10 +31,14 @@ namespace Cutie
             }).ToArray();
         }
 
-        [McpServerTool, Description("Create or update an event Pan/Crop keyframe. Position is relative to event start in milliseconds; moveX/moveY translate the crop rectangle in project pixels.")]
+        [McpServerTool, Description("Create or update an event Pan/Crop keyframe. atMs is event-relative milliseconds. moveX/moveY are relative translations; scaleX/scaleY are relative native scale factors (default 1). scaleX=-1,scaleY=1 flips horizontally; applying -1 again flips back. All properties are caller supplied.")]
+        [ToolExecution(ToolKind.Edit)]
         public object SetPanCropKeyframe(int trackIndex, int eventIndex, double atMs,
-            string interpolation, float moveX = 0, float moveY = 0, float smoothness = 0)
+            string interpolation, float moveX = 0, float moveY = 0, float smoothness = 0,
+            float scaleX = 1, float scaleY = 1)
         {
+            ValidateScaleFactor(scaleX, nameof(scaleX));
+            ValidateScaleFactor(scaleY, nameof(scaleY));
             var type = ParseVideoInterpolation(interpolation);
             var time = VegasToolSupport.Time(atMs);
             return VegasToolSupport.Edit("Set Pan/Crop keyframe", () =>
@@ -49,20 +55,18 @@ namespace Cutie
                 frame.Type = type;
                 frame.Smoothness = smoothness;
                 if (moveX != 0 || moveY != 0) frame.MoveBy(new VideoMotionVertex(moveX, moveY));
+                if (scaleX != 1 || scaleY != 1) frame.ScaleBy(new VideoMotionVertex(scaleX, scaleY));
                 return new { positionMs = frame.Position.ToMilliseconds(), type = frame.Type.ToString(),
                     smoothness = frame.Smoothness, bounds = DescribeBounds(frame.Bounds) };
             });
         }
 
         [McpServerTool, Description("List track motion keyframes, including position, interpolation, and x/y coordinates.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListTrackMotionKeyframes(int trackIndex)
         {
             var track = VideoTrack(trackIndex);
-            TrackMotion motion;
-            using (var undo = new UndoBlock(VegasToolSupport.Project, "Read track motion keyframes"))
-            {
-                motion = track.TrackMotion;
-            }
+            var motion = VegasToolSupport.ReadWithUndo("Read track motion keyframes", () => track.TrackMotion);
             return motion.MotionKeyframes.Select(frame => new
             {
                 index = frame.Index,
@@ -75,6 +79,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Create or update a track motion keyframe at timeline milliseconds, with interpolation and optional x/y coordinates in VEGAS native units.")]
+        [ToolExecution(ToolKind.Edit)]
         public object SetTrackMotionKeyframe(int trackIndex, double atMs, string interpolation,
             double? x = null, double? y = null, double? smoothness = null)
         {
@@ -99,6 +104,12 @@ namespace Cutie
                     type = frame.Type.ToString(), x = frame.PositionX, y = frame.PositionY,
                     smoothness = frame.Smoothness };
             });
+        }
+
+        private static void ValidateScaleFactor(float value, string name)
+        {
+            if (float.IsNaN(value) || float.IsInfinity(value) || value == 0)
+                throw new ArgumentOutOfRangeException(name, "Scale factor must be finite and nonzero.");
         }
 
         private static VideoEvent VideoEvent(int trackIndex, int eventIndex) =>
@@ -126,6 +137,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("List an OFX parameter's keyframes, values and interpolation types. timecodeValue is the raw VEGAS OFX timecode reading, which VEGAS 18 may expose as frame count. Target is generator, event or track.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListOfxKeyframes(string targetType, int trackIndex, int eventIndex,
             string parameterName, int effectIndex = -1, double? sampleAtMs = null)
         {
@@ -149,6 +161,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Set the interpolation type of an existing OFX parameter keyframe at an exact time in milliseconds.")]
+        [ToolExecution(ToolKind.Edit)]
         public object SetOfxKeyframeInterpolation(string targetType, int trackIndex, int eventIndex,
             string parameterName, double atMs, string interpolation, int effectIndex = -1)
         {
@@ -175,6 +188,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Set OFX keyframe interpolation by stable zero-based keyframe index. List keyframes first to obtain indices.")]
+        [ToolExecution(ToolKind.Edit)]
         public object SetOfxKeyframeInterpolationByIndex(string targetType, int trackIndex,
             int eventIndex, string parameterName, int keyframeIndex, string interpolation,
             int effectIndex = -1)

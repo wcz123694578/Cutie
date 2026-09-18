@@ -10,6 +10,7 @@ namespace Cutie
     public class TimelineTools
     {
         [McpServerTool, Description("Get the VEGAS version and installation path.")]
+        [ToolExecution(ToolKind.Read)]
         public object GetVegasInfo()
         {
             var vegas = VegasContext.Current;
@@ -17,6 +18,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Get active project properties. Times are milliseconds.")]
+        [ToolExecution(ToolKind.Read)]
         public object GetProjectInfo()
         {
             var project = VegasToolSupport.Project;
@@ -27,15 +29,19 @@ namespace Cutie
         }
 
         [McpServerTool, Description("List current tracks. Indices can change after edits; list again before editing.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListTracks() => VegasToolSupport.Project.Tracks.Select(VegasToolSupport.DescribeTrack).ToArray();
 
         [McpServerTool, Description("List events on a track by its current zero-based index.")]
+        [ToolExecution(ToolKind.Read)]
         public object ListEvents(int trackIndex) => VegasToolSupport.Track(trackIndex).Events.Select(VegasToolSupport.DescribeEvent).ToArray();
 
         [McpServerTool, Description("Get one event by current zero-based track and event indices.")]
+        [ToolExecution(ToolKind.Read)]
         public object GetEvent(int trackIndex, int eventIndex) => VegasToolSupport.DescribeEvent(VegasToolSupport.Event(trackIndex, eventIndex));
 
         [McpServerTool, Description("Get cursor, selection, loop, and playback state. Times are milliseconds.")]
+        [ToolExecution(ToolKind.Read)]
         public object GetTimelineState()
         {
             var t = VegasContext.Current.Transport;
@@ -48,6 +54,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Create a video or audio track. Index -1 appends it.")]
+        [ToolExecution(ToolKind.Edit)]
         public object CreateTrack(string type, string name, int index = -1)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Track name is required.");
@@ -63,6 +70,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Update a track. Omitted fields are unchanged.")]
+        [ToolExecution(ToolKind.Edit)]
         public object UpdateTrack(int trackIndex, string name = null, bool? mute = null, bool? solo = null)
         {
             return VegasToolSupport.Edit("Update track", () =>
@@ -76,6 +84,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Delete a track and its events by current zero-based index.")]
+        [ToolExecution(ToolKind.Edit)]
         public object DeleteTrack(int trackIndex)
         {
             return VegasToolSupport.Edit("Delete track", () =>
@@ -88,6 +97,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Add a media stream to a matching track. Start and optional length are milliseconds.")]
+        [ToolExecution(ToolKind.Edit)]
         public object AddEvent(int trackIndex, uint mediaId, double startMs, double? lengthMs = null)
         {
             var start = VegasToolSupport.Time(startMs);
@@ -108,6 +118,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Update an event. Times are milliseconds; omitted fields are unchanged.")]
+        [ToolExecution(ToolKind.Edit)]
         public object UpdateEvent(int trackIndex, int eventIndex, double? startMs = null,
             double? lengthMs = null, string name = null, bool? mute = null,
             bool? loop = null, double? playbackRate = null,
@@ -143,6 +154,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Split an event at an offset in milliseconds relative to its start.")]
+        [ToolExecution(ToolKind.Edit)]
         public object SplitEvent(int trackIndex, int eventIndex, double offsetMs)
         {
             return VegasToolSupport.Edit("Split event", () =>
@@ -154,6 +166,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Copy an event to a matching track at a start time in milliseconds.")]
+        [ToolExecution(ToolKind.Edit)]
         public object CopyEvent(int trackIndex, int eventIndex, int destinationTrackIndex, double startMs)
         {
             return VegasToolSupport.Edit("Copy event", () =>
@@ -166,6 +179,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Delete an event by current zero-based track and event indices.")]
+        [ToolExecution(ToolKind.Edit)]
         public object DeleteEvent(int trackIndex, int eventIndex)
         {
             return VegasToolSupport.Edit("Delete event", () =>
@@ -178,6 +192,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Choose an event take by current zero-based index.")]
+        [ToolExecution(ToolKind.Edit)]
         public object SetActiveTake(int trackIndex, int eventIndex, int takeIndex)
         {
             return VegasToolSupport.Edit("Set active take", () =>
@@ -190,6 +205,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Set an event's fade-in or fade-out length in milliseconds.")]
+        [ToolExecution(ToolKind.Edit)]
         public object SetEventFade(int trackIndex, int eventIndex, string side, double lengthMs)
         {
             if (side != "in" && side != "out") throw new ArgumentException("Side must be in or out.");
@@ -204,6 +220,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Set the timeline cursor in milliseconds.")]
+        [ToolExecution(ToolKind.External)]
         public object SetCursor(double positionMs)
         {
             VegasContext.Current.Transport.CursorPosition = VegasToolSupport.Time(positionMs);
@@ -211,6 +228,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Set selection start and length in milliseconds.")]
+        [ToolExecution(ToolKind.External)]
         public object SetSelection(double startMs, double lengthMs)
         {
             var t = VegasContext.Current.Transport;
@@ -220,6 +238,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Set the timeline loop region and loop playback mode. Times are milliseconds.")]
+        [ToolExecution(ToolKind.External)]
         public object SetLoop(double startMs, double lengthMs, bool enabled)
         {
             var t = VegasContext.Current.Transport;
@@ -230,6 +249,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Start VEGAS timeline playback.")]
+        [ToolExecution(ToolKind.External)]
         public object Play()
         {
             VegasContext.Current.Transport.Play();
@@ -237,6 +257,7 @@ namespace Cutie
         }
 
         [McpServerTool, Description("Stop VEGAS timeline playback.")]
+        [ToolExecution(ToolKind.External)]
         public object StopPlayback()
         {
             VegasContext.Current.Transport.Stop();

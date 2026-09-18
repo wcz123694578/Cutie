@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,91 +13,11 @@ using Newtonsoft.Json.Linq;
 
 namespace Cutie
 {
-    internal sealed class ToolRegistration
-    {
-        public ToolRegistration(
-            string name,
-            string description,
-            object inputSchema,
-            Type declaringType,
-            MethodInfo method)
-        {
-            Name = name;
-            Description = description;
-            InputSchema = inputSchema;
-            DeclaringType = declaringType;
-            Method = method;
-        }
-
-        public string Name { get; }
-
-        public string Description { get; }
-
-        public object InputSchema { get; }
-
-        private Type DeclaringType { get; }
-
-        private MethodInfo Method { get; }
-
-        public async Task<object> InvokeAsync(JObject arguments)
-        {
-            var parameterValues = Method
-                .GetParameters()
-                .Select(parameter => GetArgumentValue(
-                    arguments,
-                    parameter))
-                .ToArray();
-
-            var result = await VegasContext.InvokeAsync(
-                () =>
-                {
-                    var target = Method.IsStatic
-                        ? null
-                        : Activator.CreateInstance(DeclaringType);
-                    return Method.Invoke(target, parameterValues);
-                });
-
-            if (!(result is Task task))
-                return result;
-
-            await task.ConfigureAwait(false);
-
-            var resultProperty =
-                task.GetType().GetProperty("Result");
-
-            return resultProperty?.GetValue(task);
-        }
-
-        private static object GetArgumentValue(
-            JObject arguments,
-            ParameterInfo parameter)
-        {
-            var token = arguments?[parameter.Name];
-
-            if (token == null || token.Type == JTokenType.Null)
-            {
-                if (parameter.IsOptional)
-                    return parameter.DefaultValue;
-
-                throw new InvalidOperationException(
-                    "Missing required argument '" +
-                    parameter.Name +
-                    "'.");
-            }
-
-            var targetType =
-                Nullable.GetUnderlyingType(parameter.ParameterType)
-                ?? parameter.ParameterType;
-
-            return token.ToObject(targetType);
-        }
-    }
-
     public sealed class McpHttpServer
     {
         private readonly HttpListener _listener;
         private static readonly Lazy<IReadOnlyDictionary<string, ToolRegistration>> _toolRegistrations =
-            new Lazy<IReadOnlyDictionary<string, ToolRegistration>>(DiscoverTools);
+            ToolRegistry.Tools;
         private CancellationTokenSource _cts;
 
         public McpHttpServer(string prefix)
@@ -316,7 +236,7 @@ namespace Cutie
                 object result;
                 try
                 {
-                    result = await tool.InvokeAsync(GetToolArguments(request));
+                    result = await ToolExecutor.ExecuteAsync(tool, GetToolArguments(request));
                 }
                 catch (Exception ex)
                 {
@@ -351,7 +271,7 @@ namespace Cutie
                         }
                         },
 
-                        isError = false
+                        isError = result is BatchResult batch && batch.Status != "completed"
                     }
                 };
             }
@@ -399,136 +319,6 @@ namespace Cutie
                 : null;
         }
 
-        private static IReadOnlyDictionary<string, ToolRegistration>
-            DiscoverTools()
-        {
-            return typeof(McpHttpServer)
-                .Assembly
-                .GetTypes()
-                .Where(type => HasAttribute(
-                    type,
-                    "McpServerToolTypeAttribute"))
-                .SelectMany(type =>
-                    type.GetMethods(
-                        BindingFlags.Public |
-                        BindingFlags.Instance |
-                        BindingFlags.Static)
-                    .Where(method => HasAttribute(
-                        method,
-                        "McpServerToolAttribute"))
-                    .Select(method => new ToolRegistration(
-                        ToToolName(method.Name),
-                        GetToolDescription(method),
-                        BuildInputSchema(method),
-                        type,
-                        method)))
-                .ToDictionary(
-                    tool => tool.Name,
-                    StringComparer.OrdinalIgnoreCase);
-        }
-
-        private static bool HasAttribute(
-            MemberInfo member,
-            string attributeTypeName)
-        {
-            return member
-                .GetCustomAttributes(false)
-                .Any(attribute => string.Equals(
-                    attribute.GetType().Name,
-                    attributeTypeName,
-                    StringComparison.Ordinal));
-        }
-
-        private static string GetToolDescription(
-            MethodInfo method)
-        {
-            return method
-                .GetCustomAttributes(typeof(DescriptionAttribute), false)
-                .OfType<DescriptionAttribute>()
-                .Select(attribute => attribute.Description)
-                .FirstOrDefault()
-                ?? method.Name;
-        }
-
-        private static object BuildInputSchema(
-            MethodInfo method)
-        {
-            var parameters = method.GetParameters();
-            var properties = new Dictionary<string, object>();
-            var required = new List<string>();
-
-            foreach (var parameter in parameters)
-            {
-                properties[parameter.Name] = new Dictionary<string, object>
-                {
-                    ["type"] = MapJsonType(parameter.ParameterType)
-                };
-
-                if (!parameter.IsOptional)
-                    required.Add(parameter.Name);
-            }
-
-            var schema = new Dictionary<string, object>
-            {
-                ["type"] = "object",
-                ["properties"] = properties
-            };
-
-            if (required.Count > 0)
-                schema["required"] = required.ToArray();
-
-            return schema;
-        }
-
-        private static string MapJsonType(Type type)
-        {
-            type = Nullable.GetUnderlyingType(type) ?? type;
-
-            if (type == typeof(string) || type == typeof(Guid))
-                return "string";
-
-            if (type == typeof(bool))
-                return "boolean";
-
-            if (type.IsEnum)
-                return "string";
-
-            if (type == typeof(byte) ||
-                type == typeof(ushort) ||
-                type == typeof(uint) ||
-                type == typeof(short) ||
-                type == typeof(int) ||
-                type == typeof(long))
-            {
-                return "integer";
-            }
-
-            if (type == typeof(float) ||
-                type == typeof(double) ||
-                type == typeof(decimal))
-            {
-                return "number";
-            }
-
-            return "object";
-        }
-
-        private static string ToToolName(string methodName)
-        {
-            var builder = new StringBuilder();
-
-            for (var i = 0; i < methodName.Length; i++)
-            {
-                var character = methodName[i];
-
-                if (char.IsUpper(character) && i > 0)
-                    builder.Append('_');
-
-                builder.Append(char.ToLowerInvariant(character));
-            }
-
-            return builder.ToString();
-        }
 
     }
 }

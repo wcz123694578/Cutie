@@ -6,7 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 
-namespace Cutie
+namespace Cutie.Tools
 {
     [McpServerToolType]
     public class KeyframeTools

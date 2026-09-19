@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Windows.Threading;
 using ScriptPortal.Vegas;
 
@@ -12,6 +7,7 @@ namespace Cutie
 {
     public class EntryPoint
     {
+        [Obsolete]
         public void FromVegas(Vegas vegas)
         {
             var context = SynchronizationContext.Current;

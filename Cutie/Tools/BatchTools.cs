@@ -2,7 +2,7 @@ using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Threading.Tasks;
 
-namespace Cutie
+namespace Cutie.Tools
 {
     [McpServerToolType]
     public sealed class BatchTools

@@ -5,7 +5,8 @@
     },
     "配置文件 1": {
       "commandName": "Executable",
-      "executablePath": "C:\\Program Files\\VEGAS\\VEGAS Pro 18.0\\vegas180.exe"
+      "executablePath": "C:\\Program Files\\VEGAS\\VEGAS Pro 18.0\\vegas180.exe",
+      "commandLineArgs": "-CMDMODULE:\"C:\\code\\csharp\\Cutie\\Cutie\\bin\\Debug\\net472\""
     }
   }
 }

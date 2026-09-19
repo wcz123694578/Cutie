@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="Cutie.Views.MainView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Cutie.Views"
+             xmlns:vm="clr-namespace:Cutie.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="300">
+    <UserControl.DataContext>
+        <vm:MainViewModel/>
+    </UserControl.DataContext>
+    <Grid>
+        <Button x:Name="btnSettings"
+                Content="&#xE713;"
+                FontSize="12"
+                Width="20"
+                Height="20"
+                Margin="10"
+                Background="Transparent"
+                Command="{Binding OpenSettingsViewCommand}"
+                FontFamily="Segoe MDL2 Assets"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"/>
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+            <Button Content="开启MCP服务器"
+                    Width="150"
+                    Height="50"
+                    x:Name="McpServerButton"
+                    Click="McpServerButton_Click"/>
+            <Button Content="Test"
+                    Width="150"
+                    Height="50"
+                    x:Name="TestButton"
+                    Click="TestButton_Click"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cutie
+namespace Cutie.Contracts
 {
     public class McpRequest
     {

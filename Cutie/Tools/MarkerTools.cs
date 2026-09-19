@@ -4,7 +4,7 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 
-namespace Cutie
+namespace Cutie.Tools
 {
     [McpServerToolType]
     public class MarkerTools

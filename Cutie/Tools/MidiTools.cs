@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using ScriptPortal.Vegas;
 
-namespace Cutie
+namespace Cutie.Tools
 {
     [McpServerToolType]
     public class MidiTools

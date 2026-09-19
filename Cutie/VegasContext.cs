@@ -17,8 +17,7 @@ namespace Cutie
         public static void Initialize(Vegas vegas, SynchronizationContext synchronizationContext)
         {
             Current = vegas;
-            _synchronizationContext = synchronizationContext
-                ?? throw new ArgumentNullException(nameof(synchronizationContext));
+            _synchronizationContext = synchronizationContext;
         }
 
         public static Task<T> InvokeAsync<T>(Func<T> action)

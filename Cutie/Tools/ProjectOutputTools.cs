@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 
-namespace Cutie
+namespace Cutie.Tools
 {
     [McpServerToolType]
     public class ProjectOutputTools

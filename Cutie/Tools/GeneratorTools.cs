@@ -6,7 +6,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace Cutie
+namespace Cutie.Tools
 {
     [McpServerToolType]
     public class GeneratorTools

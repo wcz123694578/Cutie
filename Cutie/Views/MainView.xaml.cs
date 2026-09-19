@@ -1,5 +1,5 @@
-﻿using Cutie.Tools;
-using ScriptPortal.Vegas;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using Cutie.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,22 +12,27 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Cutie
+namespace Cutie.Views
 {
     /// <summary>
     /// MainView.xaml 的交互逻辑
     /// </summary>
-    public partial class MainView : Window
+    public partial class MainView : UserControl
     {
         private bool _isMcpServerStarted = false;
         private static McpHttpServer _server;
 
-
         public MainView()
         {
             InitializeComponent();
+
+            WeakReferenceMessenger.Default.Register<OpenSettingsViewMessage>(this, (r, m) =>
+            {
+                new SettingsView().ShowDialog();
+            });
         }
 
         private void McpServerButton_Click(object sender, RoutedEventArgs e)
@@ -58,23 +63,9 @@ namespace Cutie
             }
         }
 
-        private void Window_Closed(object sender, EventArgs e)
+        private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
-        }
 
-        private async void TestButton_Click(object sender, RoutedEventArgs e)
-        {
-            await VegasContext.InvokeAsync<object>(() =>
-            {
-                var keyframeTools = new KeyframeTools();
-
-                using (var ub = new UndoBlock("aaa"))
-                {
-                    VegasContext.Current.Project.AddVideoTrack();
-                }
-                return keyframeTools.ListTrackMotionKeyframes(1);
-            });
         }
     }
 }

@@ -6,7 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Globalization;
 
-namespace Cutie
+namespace Cutie.Tools
 {
     [McpServerToolType]
     public class EffectTools

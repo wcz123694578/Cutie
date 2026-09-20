@@ -6,34 +6,49 @@
              xmlns:local="clr-namespace:Cutie.Views"
              xmlns:vm="clr-namespace:Cutie.ViewModels"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="300">
+             d:DesignHeight="450" d:DesignWidth="300"
+             Foreground="{DynamicResource Vegas.WindowTextBrush}"
+             Background="{DynamicResource Vegas.WindowBackgroundBrush}">
     <UserControl.DataContext>
         <vm:MainViewModel/>
     </UserControl.DataContext>
     <Grid>
-        <Button x:Name="btnSettings"
-                Content="&#xE713;"
-                FontSize="12"
-                Width="20"
-                Height="20"
-                Margin="10"
-                Background="Transparent"
-                Command="{Binding OpenSettingsViewCommand}"
-                FontFamily="Segoe MDL2 Assets"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"/>
-        <StackPanel HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
-            <Button Content="开启MCP服务器"
-                    Width="150"
-                    Height="50"
-                    x:Name="McpServerButton"
-                    Click="McpServerButton_Click"/>
-            <Button Content="Test"
-                    Width="150"
-                    Height="50"
-                    x:Name="TestButton"
-                    Click="TestButton_Click"/>
-        </StackPanel>
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Button x:Name="btnSettings"
+                    Content="&#xE713;"
+                    FontSize="12"
+                    Width="20"
+                    Height="20"
+                    Margin="10"
+                    Background="Transparent"
+                    Command="{Binding OpenSettingsViewCommand}"
+                    FontFamily="Segoe MDL2 Assets"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Grid.Row="2"/>
+            <StackPanel Grid.Row="1"
+                        Margin="0 5 0 0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="当前监听地址："/>
+                    <TextBlock Text="{Binding CurrentListeningAddress}"/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel VerticalAlignment="Center">
+                <Button Content="开启MCP服务器"
+                        x:Name="McpServerButton"
+                        Click="McpServerButton_Click"
+                        Background="{DynamicResource Vegas.ButtonFaceBrush}"/>
+                <!--Button Content="Test"
+                        Width="150"
+                        Height="50"
+                        x:Name="TestButton"
+                        Click="TestButton_Click"/-->
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

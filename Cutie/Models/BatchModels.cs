@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 
-namespace Cutie
+namespace Cutie.Models
 {
     public sealed class BatchOperation
     {

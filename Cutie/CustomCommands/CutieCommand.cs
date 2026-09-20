@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Windows.Forms.Integration;
 using System.Windows.Threading;
+using Cutie.Resources;
+using ScriptPortal.MediaSoftware.Skins;
 using ScriptPortal.Vegas;
 
 namespace Cutie.CustomCommands
@@ -32,7 +34,9 @@ namespace Cutie.CustomCommands
 
             elementHost.Dock = System.Windows.Forms.DockStyle.Fill;
 
+
             var mainView = new Views.MainView();
+            VegasSkinsManager.Apply(mainView.Resources, ScriptPortal.MediaSoftware.Skins.Skins.Colors);
             elementHost.Child = mainView;
 
             VegasContext.Initialize(VegasContext.Current, SynchronizationContext.Current ?? new DispatcherSynchronizationContext(mainView.Dispatcher));

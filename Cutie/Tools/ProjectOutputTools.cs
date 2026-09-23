@@ -155,6 +155,30 @@ namespace Cutie.Tools
         [ToolExecution(ToolKind.Read)]
         public object GetRenderStatus() => _renderState ?? new { status = "not_started" };
 
+        [McpServerTool, Description("Render and save a preview snapshot. outputPath must be absolute; format is a VEGAS ImageFileFormat name; atMs is optional and uses the current cursor when omitted.")]
+        [ToolExecution(ToolKind.External)]
+        public object SavePreviewSnapshot(string outputPath, string format, double? atMs = null,
+            bool overwrite = false)
+        {
+            if (string.IsNullOrWhiteSpace(outputPath) || !Path.IsPathRooted(outputPath))
+                throw new ArgumentException("An absolute output path is required.");
+            if (string.IsNullOrWhiteSpace(format) || !Enum.TryParse(format, true, out ImageFileFormat imageFormat))
+                throw new ArgumentException("format must be a VEGAS ImageFileFormat name.");
+            if (atMs.HasValue && atMs.Value < 0)
+                throw new ArgumentOutOfRangeException(nameof(atMs));
+
+            outputPath = Path.GetFullPath(outputPath);
+            if (File.Exists(outputPath) && !overwrite)
+                throw new IOException("Output file exists. Set overwrite to true to replace it.");
+
+            Vegas current = VegasContext.Current;
+            current.SaveProject();
+            var status = atMs.HasValue
+                    ? current.SaveSnapshot(outputPath, imageFormat, VegasToolSupport.Time(atMs.Value))
+                    : VegasContext.Current.SaveSnapshot(outputPath, imageFormat);
+            return new { status = status.ToString(), outputPath, format = imageFormat.ToString(), atMs };
+        }
+
         private static void SubscribeToRenderEvents()
         {
             var vegas = VegasContext.Current;

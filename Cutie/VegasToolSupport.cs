@@ -115,8 +115,35 @@ namespace Cutie
                 mute = track.Mute,
                 solo = track.Solo,
                 selected = track.Selected,
-                lengthMs = track.Length.ToMilliseconds()
+                lengthMs = track.Length.ToMilliseconds(),
+                compositing = track is VideoTrack video ? DescribeCompositing(video) : null
             };
+        }
+
+        private static object DescribeCompositing(VideoTrack track)
+        {
+            return new
+            {
+                nestingLevel = track.CompositeNestingLevel,
+                isParent = track.IsCompositingParent,
+                isChild = track.IsCompositingChild,
+                parentTrackIndex = FindCompositeParentIndex(track),
+                compositeLevel = track.CompositeLevel,
+                compositeMode = track.CompositeMode.ToString(),
+                parentCompositeMode = track.ParentCompositeMode.ToString()
+            };
+        }
+
+        private static int? FindCompositeParentIndex(VideoTrack track)
+        {
+            if (!track.IsCompositingChild || track.CompositeNestingLevel < 1) return null;
+            for (var index = track.Index - 1; index >= 0; index--)
+            {
+                if (Project.Tracks[index] is VideoTrack candidate &&
+                    candidate.CompositeNestingLevel == track.CompositeNestingLevel - 1)
+                    return candidate.Index;
+            }
+            return null;
         }
 
         public static object DescribeEvent(TrackEvent item)

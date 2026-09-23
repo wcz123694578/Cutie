@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Cutie.Service;
+using System;
+using System.Collections.ObjectModel;
 
 namespace Cutie.ViewModels
 {
@@ -11,10 +13,22 @@ namespace Cutie.ViewModels
         public RelayCommand OpenSettingsViewCommand { get; set; }
         private readonly SettingsService _settingsService;
 
+        public ObservableCollection<string> ToolCallLogList { get; set; } = new ObservableCollection<string>();
+
         public MainViewModel()
         {
             OpenSettingsViewCommand = new RelayCommand(OnOpenSettingsView);
             _settingsService = Ioc.Default.GetRequiredService<SettingsService>();
+        }
+
+        public void AddToolCall(string message)
+        {
+            VegasContext.InvokeAsync<object>(() =>
+            {
+                ToolCallLogList.Insert(0, message);
+                if (ToolCallLogList.Count > 1000) ToolCallLogList.RemoveAt(ToolCallLogList.Count - 1);
+                return null;
+            });
         }
 
         private void OnOpenSettingsView()

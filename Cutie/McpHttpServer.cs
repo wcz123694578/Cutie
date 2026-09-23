@@ -22,6 +22,8 @@ namespace Cutie
             ToolRegistry.Tools;
         private CancellationTokenSource _cts;
 
+        public event EventHandler<McpToolCalledEventArgs> ToolCalled;
+
         public McpHttpServer(string prefix)
         {
             _listener = new HttpListener();
@@ -72,6 +74,7 @@ namespace Cutie
 
         private async Task HandleRequest(HttpListenerContext context)
         {
+            McpRequest request = null;
             try
             {
                 if (context.Request.HttpMethod != "POST")
@@ -90,8 +93,16 @@ namespace Cutie
                     body = await reader.ReadToEndAsync();
                 }
 
-                var request =
-                    JsonConvert.DeserializeObject<McpRequest>(body);
+                request = JsonConvert.DeserializeObject<McpRequest>(body);
+
+                var toolName = request?.method == "tools/call"
+                    ? request.@params?["name"]?.ToString()
+                    : null;
+                ToolCalled?.Invoke(this, new McpToolCalledEventArgs
+                {
+                    Message = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} {request?.method ?? "invalid_request"}" +
+                        (string.IsNullOrWhiteSpace(toolName) ? string.Empty : ": " + toolName)
+                });
 
                 if (request?.id == null &&
                     !string.IsNullOrEmpty(request?.method))
@@ -130,11 +141,21 @@ namespace Cutie
             {
                 try
                 {
+                    var response = new McpResponse
+                    {
+                        id = request?.id,
+                        error = new McpError
+                        {
+                            code = -32603,
+                            message = "Internal error",
+                            data = new { type = ex.GetType().Name, message = ex.Message }
+                        }
+                    };
+                    var bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response));
                     context.Response.StatusCode = 500;
-
-                    var bytes = Encoding.UTF8.GetBytes(
-                        ex.ToString());
-
+                    context.Response.ContentType = "application/json";
+                    context.Response.ContentEncoding = Encoding.UTF8;
+                    context.Response.ContentLength64 = bytes.Length;
                     await context.Response.OutputStream.WriteAsync(
                         bytes,
                         0,
@@ -251,6 +272,10 @@ namespace Cutie
                         result = new
                         {
                             content = new[] { new { type = "text", text = cause.Message } },
+                            structuredContent = new
+                            {
+                                error = DescribeToolError(cause)
+                            },
                             isError = true
                         }
                     };
@@ -319,6 +344,27 @@ namespace Cutie
             return fallbackArguments.HasValues
                 ? fallbackArguments
                 : null;
+        }
+
+        private static object DescribeToolError(Exception exception)
+        {
+            var argument = exception as ArgumentException;
+            return new
+            {
+                code = ToolErrorCode(exception),
+                type = exception.GetType().Name,
+                message = exception.Message,
+                parameterName = argument?.ParamName
+            };
+        }
+
+        private static string ToolErrorCode(Exception exception)
+        {
+            if (exception is ArgumentOutOfRangeException) return "argument_out_of_range";
+            if (exception is ArgumentException) return "invalid_argument";
+            if (exception is InvalidOperationException) return "invalid_operation";
+            if (exception is System.IO.IOException) return "io_error";
+            return "tool_execution_failed";
         }
 
 

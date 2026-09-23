@@ -61,27 +61,20 @@ namespace Cutie.Tools
             });
         }
 
-        [McpServerTool, Description("List track motion keyframes, including position, interpolation, and x/y coordinates.")]
+        [McpServerTool, Description("List track motion keyframes, including position, interpolation, scale, and rotation in VEGAS native units.")]
         [ToolExecution(ToolKind.Read)]
         public object ListTrackMotionKeyframes(int trackIndex)
         {
             var track = VideoTrack(trackIndex);
             var motion = VegasToolSupport.ReadWithUndo("Read track motion keyframes", () => track.TrackMotion);
-            return motion.MotionKeyframes.Select(frame => new
-            {
-                index = frame.Index,
-                positionMs = frame.Position.ToMilliseconds(),
-                type = frame.Type.ToString(),
-                smoothness = frame.Smoothness,
-                x = frame.PositionX,
-                y = frame.PositionY
-            }).ToArray();
+            return DescribeTrackMotionKeyframes(motion);
         }
 
-        [McpServerTool, Description("Create or update a track motion keyframe at timeline milliseconds, with interpolation and optional x/y coordinates in VEGAS native units.")]
+        [McpServerTool, Description("Create or update a track motion keyframe at timeline milliseconds, with interpolation and optional x/y position, scaleX/scaleY scaling, and rotation in VEGAS native units.")]
         [ToolExecution(ToolKind.Edit)]
         public object SetTrackMotionKeyframe(int trackIndex, double atMs, string interpolation,
-            double? x = null, double? y = null, double? smoothness = null)
+            double? x = null, double? y = null, double? scaleX = null, double? scaleY = null, double? rotation = null,
+            double? smoothness = null)
         {
             var type = ParseVideoInterpolation(interpolation);
             var time = VegasToolSupport.Time(atMs);
@@ -93,16 +86,31 @@ namespace Cutie.Tools
                 {
                     throw new NotSupportedException("VEGAS returned E_UNEXPECTED while opening TrackMotion; no keyframe was changed.", ex);
                 }
-                var frame = motion.MotionKeyframes.FirstOrDefault(item =>
-                    Math.Abs(item.Position.ToMilliseconds() - atMs) < 0.6)
-                    ?? motion.InsertMotionKeyframe(time);
-                frame.Type = type;
-                if (x.HasValue) frame.PositionX = x.Value;
-                if (y.HasValue) frame.PositionY = y.Value;
-                if (smoothness.HasValue) frame.Smoothness = smoothness.Value;
-                return new { index = frame.Index, positionMs = frame.Position.ToMilliseconds(),
-                    type = frame.Type.ToString(), x = frame.PositionX, y = frame.PositionY,
-                    smoothness = frame.Smoothness };
+                return SetTrackMotionKeyframe(motion, time, atMs, type, x, y, scaleX, scaleY, rotation, smoothness);
+            });
+        }
+
+        [McpServerTool, Description("List parent track motion keyframes for a parent video track that has child tracks, including position, interpolation, scale, and rotation in VEGAS native units.")]
+        [ToolExecution(ToolKind.Read)]
+        public object ListParentTrackMotionKeyframes(int trackIndex)
+        {
+            var track = VideoTrack(trackIndex);
+            var motion = VegasToolSupport.ReadWithUndo("Read parent track motion keyframes", () => ParentTrackMotion(track));
+            return DescribeTrackMotionKeyframes(motion);
+        }
+
+        [McpServerTool, Description("Create or update a parent track motion keyframe for a parent video track that has child tracks at timeline milliseconds, with interpolation and optional x/y position, scaleX/scaleY scaling, and rotation in VEGAS native units.")]
+        [ToolExecution(ToolKind.Edit)]
+        public object SetParentTrackMotionKeyframe(int trackIndex, double atMs, string interpolation,
+            double? x = null, double? y = null, double? scaleX = null, double? scaleY = null, double? rotation = null,
+            double? smoothness = null)
+        {
+            var type = ParseVideoInterpolation(interpolation);
+            var time = VegasToolSupport.Time(atMs);
+            return VegasToolSupport.Edit("Set parent track motion keyframe", () =>
+            {
+                var motion = ParentTrackMotion(VideoTrack(trackIndex));
+                return SetTrackMotionKeyframe(motion, time, atMs, type, x, y, scaleX, scaleY, rotation, smoothness);
             });
         }
 
@@ -119,6 +127,45 @@ namespace Cutie.Tools
         private static VideoTrack VideoTrack(int trackIndex) =>
             VegasToolSupport.Track(trackIndex) as VideoTrack
             ?? throw new ArgumentException("Target track must be video.");
+
+        private static TrackMotion ParentTrackMotion(VideoTrack track)
+        {
+            if (!track.IsCompositingParent)
+                throw new ArgumentException("Target video track must be a compositing parent with at least one child track to use ParentTrackMotion.");
+            return track.ParentTrackMotion
+                ?? throw new InvalidOperationException("VEGAS did not provide ParentTrackMotion for the compositing parent track.");
+        }
+
+        private static object[] DescribeTrackMotionKeyframes(TrackMotion motion) =>
+            motion.MotionKeyframes.Cast<TrackMotionKeyframe>().Select(DescribeTrackMotionKeyframe).ToArray();
+
+        private static object DescribeTrackMotionKeyframe(TrackMotionKeyframe frame) => new
+        {
+            index = frame.Index,
+            positionMs = frame.Position.ToMilliseconds(),
+            type = frame.Type.ToString(),
+            smoothness = frame.Smoothness,
+            position = new { x = frame.PositionX, y = frame.PositionY },
+            scale = new { scaleX = frame.Width, scaleY = frame.Height },
+            rotation = new { rotation = frame.RotationZ }
+        };
+
+        private static object SetTrackMotionKeyframe(TrackMotion motion, Timecode time, double atMs,
+            VideoKeyframeType type, double? x, double? y, double? scaleX, double? scaleY,
+            double? rotation, double? smoothness)
+        {
+            var frame = motion.MotionKeyframes.FirstOrDefault(item =>
+                Math.Abs(item.Position.ToMilliseconds() - atMs) < 0.6)
+                ?? motion.InsertMotionKeyframe(time);
+            frame.Type = type;
+            if (x.HasValue) frame.PositionX = x.Value;
+            if (y.HasValue) frame.PositionY = y.Value;
+            if (scaleX.HasValue) frame.Width = scaleX.Value;
+            if (scaleY.HasValue) frame.Height = scaleY.Value;
+            if (rotation.HasValue) frame.RotationZ = rotation.Value;
+            if (smoothness.HasValue) frame.Smoothness = smoothness.Value;
+            return DescribeTrackMotionKeyframe(frame);
+        }
 
         private static object DescribeBounds(VideoMotionBounds bounds) => new
         {

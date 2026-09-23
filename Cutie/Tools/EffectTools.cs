@@ -16,7 +16,7 @@ namespace Cutie.Tools
         public object ListPlugins(string type, int limit = 100)
         {
             if (type != "video" && type != "audio") throw new ArgumentException("Type must be video or audio.");
-            if (limit < 1 || limit > 500) throw new ArgumentOutOfRangeException(nameof(limit));
+            // if (limit < 1 || limit > 500) throw new ArgumentOutOfRangeException(nameof(limit));
             var root = type == "video" ? VegasContext.Current.VideoFX : VegasContext.Current.AudioFX;
             return Walk(root).Where(node => !node.IsContainer && !node.IsDisabled)
                 .Take(limit).Select(node => new

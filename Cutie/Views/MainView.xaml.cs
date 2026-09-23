@@ -43,6 +43,7 @@ namespace Cutie.Views
 
                 if (_server != null)
                 {
+                    _server.ToolCalled -= McpServer_ToolCalled;
                     _server.Stop();
                     _server = null;
                 }
@@ -56,6 +57,7 @@ namespace Cutie.Views
                 {
                     _server = new McpHttpServer(
                         "http://127.0.0.1:57231/");
+                    _server.ToolCalled += McpServer_ToolCalled;
 
                     _server.Start();
                 }
@@ -63,9 +65,24 @@ namespace Cutie.Views
             }
         }
 
+        private void McpServer_ToolCalled(object sender, McpToolCalledEventArgs e)
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(() => McpServer_ToolCalled(sender, e)));
+                return;
+            }
+            (DataContext as MainViewModel)?.AddToolCall(e.Message);
+        }
+
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-
+            var vegas = VegasContext.Current;
+            VegasContext.InvokeAsync<object>(() =>
+            {
+                vegas.SaveSnapshot("D:\\Code\\csharp\\VEGAS\\Cutie\\preview-snapshot-manual.png", ScriptPortal.Vegas.ImageFileFormat.PNG, VegasToolSupport.Time(3000));
+                return null;
+            });
         }
     }
 }

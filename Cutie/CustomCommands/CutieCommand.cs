@@ -29,6 +29,8 @@ namespace Cutie.CustomCommands
 
             var dock = new DockableControl("CutieView");
 
+            dock.Closed += CutieView_AppWindowClosed;
+
             var elementHost = new ElementHost();
             dock.Controls.Add(elementHost);
 
@@ -41,6 +43,11 @@ namespace Cutie.CustomCommands
 
             VegasContext.Initialize(VegasContext.Current, SynchronizationContext.Current ?? new DispatcherSynchronizationContext(mainView.Dispatcher));
             VegasContext.Current.LoadDockView(dock);
+        }
+
+        private void CutieView_AppWindowClosed(object sender, EventArgs e)
+        {
+            int a = 1;
         }
     }
 }

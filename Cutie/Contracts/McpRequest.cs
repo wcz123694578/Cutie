@@ -36,5 +36,8 @@ namespace Cutie.Contracts
         public int code { get; set; }
 
         public string message { get; set; }
+
+        [Newtonsoft.Json.JsonProperty(NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public object data { get; set; }
     }
 }

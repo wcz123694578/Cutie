@@ -9,6 +9,45 @@
              d:DesignHeight="450" d:DesignWidth="300"
              Foreground="{DynamicResource Vegas.WindowTextBrush}"
              Background="{DynamicResource Vegas.WindowBackgroundBrush}">
+
+    <UserControl.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource Vegas.ButtonTextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource Vegas.ButtonFaceBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Vegas.ButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="5,2"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="{DynamicResource Vegas.FontFamily}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="ListView">
+            <Setter Property="Foreground" Value="{DynamicResource Vegas.WindowTextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource Vegas.WindowBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Vegas.ButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="5,2"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="{DynamicResource Vegas.FontFamily}"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
+        <Style TargetType="ListViewItem">
+            <Setter Property="Foreground" Value="{DynamicResource Vegas.WindowTextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource Vegas.WindowBackgroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Vegas.ButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="5,2"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="{DynamicResource Vegas.FontFamily}"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
+    </UserControl.Resources>
     <UserControl.DataContext>
         <vm:MainViewModel/>
     </UserControl.DataContext>
@@ -31,23 +70,21 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"
                     Grid.Row="2"/>
-            <StackPanel Grid.Row="1"
-                        Margin="0 5 0 0">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="当前监听地址："/>
-                    <TextBlock Text="{Binding CurrentListeningAddress}"/>
-                </StackPanel>
-            </StackPanel>
+            <ListView x:Name="lstLog"
+                      Grid.Row="1"
+                      Margin="0 5 0 0"
+                      ItemsSource="{Binding ToolCallLogList}">
+                
+            </ListView>
             <StackPanel VerticalAlignment="Center">
                 <Button Content="开启MCP服务器"
                         x:Name="McpServerButton"
-                        Click="McpServerButton_Click"
-                        Background="{DynamicResource Vegas.ButtonFaceBrush}"/>
-                <!--Button Content="Test"
+                        Click="McpServerButton_Click"/>
+                <Button Content="Test"
                         Width="150"
                         Height="50"
                         x:Name="TestButton"
-                        Click="TestButton_Click"/-->
+                        Click="TestButton_Click"/>
             </StackPanel>
         </Grid>
     </Grid>

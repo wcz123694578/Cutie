@@ -80,11 +80,11 @@
                 <Button Content="开启MCP服务器"
                         x:Name="McpServerButton"
                         Click="McpServerButton_Click"/>
-                <Button Content="Test"
+                <!--Button Content="Test"
                         Width="150"
                         Height="50"
                         x:Name="TestButton"
-                        Click="TestButton_Click"/>
+                        Click="TestButton_Click"/-->
             </StackPanel>
         </Grid>
     </Grid>

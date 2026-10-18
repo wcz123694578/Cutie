@@ -10,6 +10,8 @@ namespace Cutie.CustomCommands
 {
     public class CutieCommand : CustomCommand
     {
+        public static string DockViewName = "CutieView";
+
         public CutieCommand(CommandCategory category, string name) : base(category, name)
         {
             InitializeCommand();
@@ -22,12 +24,12 @@ namespace Cutie.CustomCommands
 
         private void CutieCommand_Invoked(object sender, EventArgs e)
         {
-            if (VegasContext.Current.ActivateDockView("CutieView"))
+            if (VegasContext.Current.ActivateDockView(DockViewName))
             {
                 return;
             }
 
-            var dock = new DockableControl("CutieView");
+            var dock = new DockableControl(DockViewName);
 
             dock.Closed += CutieView_AppWindowClosed;
 

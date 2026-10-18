@@ -172,13 +172,11 @@ namespace Cutie.Tools
                 throw new IOException("Output file exists. Set overwrite to true to replace it.");
 
             Vegas current = VegasContext.Current;
-
-            // 这里必须要保存一下，不然会阻塞。然而就算保存了也会偶发阻塞，原因不明
-            current.SaveProject();
+            current.ActivateDockView(CustomCommands.CutieCommand.DockViewName);
 
             var status = atMs.HasValue
                     ? current.SaveSnapshot(outputPath, imageFormat, VegasToolSupport.Time(atMs.Value))
-                    : VegasContext.Current.SaveSnapshot(outputPath, imageFormat);
+                    : current.SaveSnapshot(outputPath, imageFormat);
             return new { status = status.ToString(), outputPath, format = imageFormat.ToString(), atMs };
         }
 

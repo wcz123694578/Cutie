@@ -200,8 +200,13 @@ namespace Cutie.Tools
             if (sampleAtMs.HasValue)
             {
                 var time = VegasToolSupport.OfxTime(sampleAtMs.Value);
-                var method = parameter.GetType().GetMethod("GetValueAtTime", new[] { typeof(Timecode) });
-                sampleValue = method?.Invoke(parameter, new object[] { time });
+                if (parameter is OFXChoiceParameter choice)
+                    sampleValue = OfxChoiceSampling.GetValueAtTime(choice, time);
+                else
+                {
+                    var method = parameter.GetType().GetMethod("GetValueAtTime", new[] { typeof(Timecode) });
+                    sampleValue = method?.Invoke(parameter, new object[] { time });
+                }
             }
             return new { parameterName = parameter.Name, parameterType = parameter.ParameterType.ToString(),
                 keyframes = frames, sampleAtMs, sampleValue };

@@ -9,16 +9,24 @@
 		<FileVersion>0.0.0.2</FileVersion>
 	</PropertyGroup>
 	<ItemGroup>
-	  <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
-	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
-	  <PackageReference Include="ModelContextProtocol" Version="2.2.0" />
-	  <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-	  <PackageReference Include="Melanchall.DryWetMidi.Nativeless" Version="8.0.3" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
+		<PackageReference Include="Costura.Fody" Version="6.2.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Fody" Version="6.9.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+		<PackageReference Include="ModelContextProtocol" Version="2.2.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="Melanchall.DryWetMidi.Nativeless" Version="8.0.3" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="ScriptPortal.MediaSoftware.Skins">
-		  <HintPath>D:\Program Files\VEGAS\VEGAS Pro 18.0\ScriptPortal.MediaSoftware.Skins.dll</HintPath>
-		  <Private>False</Private>
+			<HintPath>D:\Program Files\VEGAS\VEGAS Pro 18.0\ScriptPortal.MediaSoftware.Skins.dll</HintPath>
+			<Private>False</Private>
 		</Reference>
 		<Reference Include="ScriptPortal.Vegas">
 			<HintPath>D:\Program Files\VEGAS\VEGAS Pro 18.0\ScriptPortal.Vegas.dll</HintPath>
@@ -27,4 +35,28 @@
 		<Reference Include="System.Windows.Forms" />
 		<Reference Include="WindowsFormsIntegration" />
 	</ItemGroup>
+	<!-- 发布时排除 Costura 已嵌入的托管依赖 -->
+	<Target Name="RemoveCosturaDependenciesFromPublish"
+			AfterTargets="ComputeFilesToPublish"
+			Condition="'$(IsPublishable)' != 'false'">
+
+		<ItemGroup>
+			<!-- 找出除 Cutie.dll 以外的其他 DLL -->
+			<_EmbeddedDllToExclude
+				Include="@(ResolvedFileToPublish)"
+				Condition="
+          '%(ResolvedFileToPublish.Extension)' == '.dll'
+          And '%(ResolvedFileToPublish.Filename)' != 'Cutie'
+          And '%(ResolvedFileToPublish.RelativePath)' == '%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)'
+        " />
+
+			<!-- 从发布清单中移除 -->
+			<ResolvedFileToPublish
+				Remove="@(_EmbeddedDllToExclude)" />
+		</ItemGroup>
+
+		<Message Importance="high"
+				 Text="Costura: excluded from publish: @(_EmbeddedDllToExclude)" />
+
+	</Target>
 </Project>

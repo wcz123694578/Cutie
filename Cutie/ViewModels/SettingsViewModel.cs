@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using Cutie.Models;
@@ -7,7 +7,7 @@ using System;
 
 namespace Cutie.ViewModels
 {
-    public class SettingsViewModel : ObservableObject
+    internal class SettingsViewModel : ObservableObject
     {
         private readonly SettingsService _configureService;
 

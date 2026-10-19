@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -8,7 +8,7 @@ using System.Collections.ObjectModel;
 
 namespace Cutie.ViewModels
 {
-    public class MainViewModel : ObservableObject
+    internal class MainViewModel : ObservableObject
     {
         public RelayCommand OpenSettingsViewCommand { get; set; }
         private readonly SettingsService _settingsService;

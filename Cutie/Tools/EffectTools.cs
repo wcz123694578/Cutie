@@ -86,7 +86,7 @@ namespace Cutie.Tools
             });
         }
 
-        [McpServerTool, Description("List OFX parameters for a track or event effect, including current values and choices.")]
+        [McpServerTool, Description("List OFX parameters for a track or event effect. Choice values include selectedIndex and choices with index and name.")]
         [ToolExecution(ToolKind.Read)]
         public object ListEffectParameters(string targetType, int trackIndex, int effectIndex, int eventIndex = -1)
         {
@@ -100,7 +100,7 @@ namespace Cutie.Tools
             }).ToArray();
         }
 
-        [McpServerTool, Description("Set a Boolean, numeric, string, or choice OFX parameter. Value is text; optional atMs sets a keyframe.")]
+        [McpServerTool, Description("Set a Boolean, numeric, string, or choice OFX parameter. For Choice, pass a returned choice index as value text (for example 1); names remain supported for compatibility. Optional atMs sets a keyframe.")]
         [ToolExecution(ToolKind.Edit)]
         public object SetEffectParameter(string targetType, int trackIndex, int effectIndex,
             string parameterName, string value, int eventIndex = -1, double? atMs = null)
@@ -133,7 +133,16 @@ namespace Cutie.Tools
             if (parameter is OFXRGBParameter rgb) return new { r = rgb.Value.R, g = rgb.Value.G, b = rgb.Value.B };
             if (parameter is OFXRGBAParameter rgba) return new { r = rgba.Value.R, g = rgba.Value.G, b = rgba.Value.B, a = rgba.Value.A };
             if (parameter is OFXChoiceParameter c)
-                return new { selected = c.Value?.Name, choices = c.Choices.Select(x => x.Name).ToArray() };
+            {
+                var selected = c.Value;
+                return new {
+                    selected = selected?.Name,
+                    selectedIndex = selected?.Index,
+                    choices = c.Choices.Select(choice => new {
+                        index = choice.Index, name = choice.Name
+                    }).ToArray()
+                };
+            }
             return null;
         }
 
@@ -189,7 +198,7 @@ namespace Cutie.Tools
                     choice = c.Choices.FirstOrDefault(item => item.Index == choiceIndex);
                 else
                     choice = c.Choices.FirstOrDefault(item => string.Equals(item.Name, value, StringComparison.OrdinalIgnoreCase));
-                if (choice == null) throw new ArgumentException("Choice name or index was not found.");
+                if (choice == null) throw new ArgumentException("Choice index or name was not found. Use an index returned by the parameter list.");
                 if (time == null) c.Value = choice; else c.SetValueAtTime(time, choice);
             }
             else throw new NotSupportedException("This OFX parameter type needs a dedicated value format.");

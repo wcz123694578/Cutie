@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.Messaging;
+using Cutie.NotificationModels;
 using ModelContextProtocol.Server;
 using ScriptPortal.Vegas;
 using System;
@@ -172,7 +174,8 @@ namespace Cutie.Tools
                 throw new IOException("Output file exists. Set overwrite to true to replace it.");
 
             Vegas current = VegasContext.Current;
-            current.ActivateDockView(CustomCommands.CutieCommand.DockViewName);
+            // current.ActivateDockView(CustomCommands.CutieCommand.DockViewName);
+            WeakReferenceMessenger.Default.Send(new ActiveViewMessage());
 
             var status = atMs.HasValue
                     ? current.SaveSnapshot(outputPath, imageFormat, VegasToolSupport.Time(atMs.Value))

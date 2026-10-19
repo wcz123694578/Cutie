@@ -36,27 +36,17 @@
 		<Reference Include="WindowsFormsIntegration" />
 	</ItemGroup>
 	<!-- 发布时排除 Costura 已嵌入的托管依赖 -->
-	<Target Name="RemoveCosturaDependenciesFromPublish"
-			AfterTargets="ComputeFilesToPublish"
-			Condition="'$(IsPublishable)' != 'false'">
+	<Target Name="RemoveCosturaDependenciesFromPublish" AfterTargets="ComputeFilesToPublish" Condition="'$(IsPublishable)' != 'false'">
 
 		<ItemGroup>
 			<!-- 找出除 Cutie.dll 以外的其他 DLL -->
-			<_EmbeddedDllToExclude
-				Include="@(ResolvedFileToPublish)"
-				Condition="
-          '%(ResolvedFileToPublish.Extension)' == '.dll'
-          And '%(ResolvedFileToPublish.Filename)' != 'Cutie'
-          And '%(ResolvedFileToPublish.RelativePath)' == '%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)'
-        " />
+			<_EmbeddedDllToExclude Include="@(ResolvedFileToPublish)" Condition="&#xD;&#xA;          '%(ResolvedFileToPublish.Extension)' == '.dll'&#xD;&#xA;          And '%(ResolvedFileToPublish.Filename)' != 'Cutie'&#xD;&#xA;          And '%(ResolvedFileToPublish.RelativePath)' == '%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)'&#xD;&#xA;        " />
 
 			<!-- 从发布清单中移除 -->
-			<ResolvedFileToPublish
-				Remove="@(_EmbeddedDllToExclude)" />
+			<ResolvedFileToPublish Remove="@(_EmbeddedDllToExclude)" />
 		</ItemGroup>
 
-		<Message Importance="high"
-				 Text="Costura: excluded from publish: @(_EmbeddedDllToExclude)" />
+		<Message Importance="high" Text="Costura: excluded from publish: @(_EmbeddedDllToExclude)" />
 
 	</Target>
 </Project>

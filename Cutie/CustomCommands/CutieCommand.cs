@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Windows.Forms.Integration;
 using System.Windows.Threading;
+using CommunityToolkit.Mvvm.Messaging;
+using Cutie.NotificationModels;
 using Cutie.Resources;
 using ScriptPortal.MediaSoftware.Skins;
 using ScriptPortal.Vegas;
@@ -10,11 +12,16 @@ namespace Cutie.CustomCommands
 {
     public class CutieCommand : CustomCommand
     {
-        public static string DockViewName = "CutieView";
+        private const string DockViewName = "CutieView";
 
         public CutieCommand(CommandCategory category, string name) : base(category, name)
         {
             InitializeCommand();
+
+            WeakReferenceMessenger.Default.Register<ActiveViewMessage>(this, (r, m) =>
+            {
+                VegasContext.Current.ActivateDockView(DockViewName);
+            });
         }
 
         private void InitializeCommand()

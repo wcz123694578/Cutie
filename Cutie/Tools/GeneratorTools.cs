@@ -68,7 +68,7 @@ namespace Cutie.Tools
             });
         }
 
-        [McpServerTool, Description("List OFX parameters on a generated media event, including values and animation support.")]
+        [McpServerTool, Description("List OFX parameters on a generated media event. Choice values include selectedIndex and choices with index and name.")]
         [ToolExecution(ToolKind.Read)]
         public object ListGeneratorParameters(int trackIndex, int eventIndex)
         {
@@ -82,7 +82,7 @@ namespace Cutie.Tools
             }).ToArray();
         }
 
-        [McpServerTool, Description("Set a generated media OFX parameter. Numeric vectors and RGB/RGBA colors use comma-separated components; optional atMs sets a keyframe.")]
+        [McpServerTool, Description("Set a generated media OFX parameter. For Choice, pass a returned choice index as value text (for example 1); names remain supported for compatibility. Numeric vectors and RGB/RGBA colors use comma-separated components; optional atMs sets a keyframe.")]
         [ToolExecution(ToolKind.Edit)]
         public object SetGeneratorParameter(int trackIndex, int eventIndex,
             string parameterName, string value, double? atMs = null)

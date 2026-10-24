@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net481</TargetFramework>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Xml.Linq" />
+    <Compile Include="../../Cutie.Launcher/LocalSettings.cs" Link="LocalSettings.cs" />
+    <Compile Include="../../Cutie.Launcher/VegasInstallation.cs" Link="VegasInstallation.cs" />
+    <Compile Include="../../Cutie.Launcher/DebugLaunch.cs" Link="DebugLaunch.cs" />
+    <Compile Include="../../Cutie.Launcher/VisualStudioSession.cs" Link="VisualStudioSession.cs" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+{
+	"servers": {
+		"Cutie": {
+			"url": "http://127.0.0.1:57321/",
+			"type": "http"
+		}
+	},
+	"inputs": []
+}

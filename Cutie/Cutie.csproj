@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net481</TargetFramework>
+		<UseVegasSdk>true</UseVegasSdk>
 		<RootNamespace>Cutie</RootNamespace>
 		<AssemblyName>Cutie</AssemblyName>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -25,15 +26,18 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="ScriptPortal.MediaSoftware.Skins">
-			<HintPath>D:\Program Files\VEGAS\VEGAS Pro 18.0\ScriptPortal.MediaSoftware.Skins.dll</HintPath>
+			<HintPath>$(VegasSdkDirectory)\ScriptPortal.MediaSoftware.Skins.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="ScriptPortal.Vegas">
-			<HintPath>D:\Program Files\VEGAS\VEGAS Pro 18.0\ScriptPortal.Vegas.dll</HintPath>
+			<HintPath>$(VegasSdkDirectory)\ScriptPortal.Vegas.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="System.Windows.Forms" />
 		<Reference Include="WindowsFormsIntegration" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Cutie.Shared\Cutie.Shared.csproj" />
 	</ItemGroup>
 	<!-- 发布时排除 Costura 已嵌入的托管依赖 -->
 	<Target Name="RemoveCosturaDependenciesFromPublish" AfterTargets="ComputeFilesToPublish" Condition="'$(IsPublishable)' != 'false'">

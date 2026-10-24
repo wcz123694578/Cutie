@@ -1,4 +1,4 @@
-﻿<Window x:Class="Cutie.Views.SettingsView"
+<Window x:Class="Cutie.Views.SettingsView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,11 +6,26 @@
         xmlns:local="clr-namespace:Cutie.Views"
         xmlns:vm="clr-namespace:Cutie.ViewModels"
         mc:Ignorable="d"
-        Title="SettingsView" Height="450" Width="800">
+        Title="SettingsView" Height="450" Width="400"
+        Foreground="{DynamicResource Vegas.WindowTextBrush}"
+        Background="{DynamicResource Vegas.WindowBackgroundBrush}">
     <Window.DataContext>
         <vm:SettingsViewModel/>
     </Window.DataContext>
     <Grid>
+        <Grid.Resources>
+            <Style TargetType="Button">
+                <Setter Property="Foreground" Value="{DynamicResource Vegas.ButtonTextBrush}"/>
+                <Setter Property="Background" Value="{DynamicResource Vegas.ButtonFaceBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Vegas.ControlDarkBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="5,2"/>
+                <Setter Property="Margin" Value="5"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -20,11 +35,12 @@
                        FontWeight="Bold"/>
             <TextBox Margin="0 5 0 0"
                      HorizontalAlignment="Left"
+                     Background="{DynamicResource Vegas.WindowBackgroundBrush}"
+                     Foreground="{DynamicResource Vegas.WindowTextBrush}"
                      Width="200"
                      Text="{Binding McpServerPort, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
         </StackPanel>
-        <Grid Grid.Row="1"
-              Background="AliceBlue">
+        <Grid Grid.Row="1">
             <Button Width="80"
                     Content="保存"
                     HorizontalAlignment="Right"

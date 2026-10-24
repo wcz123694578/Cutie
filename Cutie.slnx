@@ -2,6 +2,9 @@
   <Folder Name="/解决方案项/">
     <File Path="README.md" />
   </Folder>
+  <Project Path="Cutie.Launcher/Cutie.Launcher.csproj" />
+  <Project Path="Cutie.Shared/Cutie.Shared.csproj" Id="510dfc5d-b837-4afb-9a0c-1333dfa6984d" />
   <Project Path="Cutie/Cutie.csproj" />
   <Project Path="tests/Cutie.BatchTests/Cutie.BatchTests.csproj" />
+  <Project Path="tests/Cutie.LauncherTests/Cutie.LauncherTests.csproj" />
 </Solution>

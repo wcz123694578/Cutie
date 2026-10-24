@@ -1,0 +1,11 @@
+<Project>
+  <Target Name="ValidateVegasSdk" BeforeTargets="ResolveAssemblyReferences"
+          Condition="'$(UseVegasSdk)' == 'true' and '$(DesignTimeBuild)' != 'true'">
+    <Error Condition="'$(VegasSdkDirectory)' == '' or !Exists('$(VegasSdkDirectory)\ScriptPortal.Vegas.dll') or !Exists('$(VegasSdkDirectory)\ScriptPortal.MediaSoftware.Skins.dll')"
+           Text="VEGAS SDK 未配置或路径失效。请将 Cutie.Launcher 设为启动项目并运行，完成本机配置。也可通过 /p:VegasSdkDirectory 指定 SDK 目录。" />
+  </Target>
+  <Target Name="WriteCutieLaunchInfo" AfterTargets="Build"
+          Condition="'$(MSBuildProjectName)' == 'Cutie' and '$(CutieLaunchInfoFile)' != ''">
+    <WriteLinesToFile File="$(CutieLaunchInfoFile)" Lines="$(TargetPath)" Overwrite="true" Encoding="UTF-8" />
+  </Target>
+</Project>

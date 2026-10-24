@@ -14,7 +14,7 @@ namespace Cutie
     {
         public ICollection GetCustomCommands()
         {
-            var cutieCommand = new CutieCommand(CommandCategory.Tools, "CutieCommand");
+            var cutieCommand = new CutieCommand(CommandCategory.Tools, "启动Cutie");
             return new CustomCommand[] { cutieCommand };
         }
 

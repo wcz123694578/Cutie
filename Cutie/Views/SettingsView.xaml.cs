@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+using Cutie.Resources;
+using CommunityToolkit.Mvvm.Messaging;
 using Cutie.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,7 @@ namespace Cutie.Views
         public SettingsView()
         {
             InitializeComponent();
+            VegasSkinsManager.Apply(Resources, ScriptPortal.MediaSoftware.Skins.Skins.Colors);
         }
     }
 }

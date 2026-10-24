@@ -12,7 +12,7 @@ namespace Cutie.CustomCommands
 {
     public class CutieCommand : CustomCommand
     {
-        private const string DockViewName = "CutieView";
+        private const string DockViewName = "Cutie";
 
         public CutieCommand(CommandCategory category, string name) : base(category, name)
         {
@@ -56,7 +56,6 @@ namespace Cutie.CustomCommands
 
         private void CutieView_AppWindowClosed(object sender, EventArgs e)
         {
-            int a = 1;
         }
     }
 }

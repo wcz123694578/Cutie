@@ -83,28 +83,17 @@ namespace Cutie.Tools
             });
         }
 
-        // [McpServerTool, Description("Move a track to a specified final zero-based index. Track indices can change after this operation; call list_tracks again. Moving tracks can change parent/child compositing relationships because VEGAS derives them from track order and nesting levels.")]
-        // [ToolExecution(ToolKind.Edit)]
-        // public object MoveTrack(int trackIndex, int destinationIndex)
-        // {
-        //     var tracks = VegasToolSupport.Project.Tracks;
-        //     if (trackIndex < 0 || trackIndex >= tracks.Count)
-        //         throw new ArgumentOutOfRangeException(nameof(trackIndex), "Track index is out of range. Call list_tracks again.");
-        //     if (destinationIndex < 0 || destinationIndex >= tracks.Count)
-        //         throw new ArgumentOutOfRangeException(nameof(destinationIndex), "Destination index is out of range. Call list_tracks again.");
-
-        //     return VegasToolSupport.Edit("Move track", () =>
-        //     {
-        //         var track = VegasToolSupport.Track(trackIndex);
-        //         if (trackIndex != destinationIndex)
-        //         {
-        //             tracks.Remove(track);
-        //             tracks.Insert(destinationIndex, track);
-        //         }
-
-        //         return VegasToolSupport.DescribeTrack(track);
-        //     });
-        // }
+        [McpServerTool, Description("Move count contiguous tracks to a final zero-based starting index, preserving track identity. Count defaults to 1. Include complete track groups and compositing subtrees. Existing compositing parents and nesting levels are preserved; moves that split a subtree or change its parent are rejected. Track indices change after moving; call list_tracks again.")]
+        [ToolExecution(ToolKind.Edit)]
+        public object MoveTrack(int trackIndex, int destinationIndex, int count = 1)
+        {
+            return VegasToolSupport.Edit("Move tracks", () =>
+            {
+                var track = VegasToolSupport.Track(trackIndex);
+                Cutie.Shared.TrackMover.Move(VegasToolSupport.Project, trackIndex, count, destinationIndex);
+                return VegasToolSupport.DescribeTrack(track);
+            });
+        }
 
         [McpServerTool, Description("Delete a track and its events by current zero-based index.")]
         [ToolExecution(ToolKind.Edit)]

@@ -49,3 +49,6 @@ _ReSharper*/
 
 # Project-specific generated test assets
 /mg_tests
+
+# Local VEGAS development settings
+/Vegas.local.props

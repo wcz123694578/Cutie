@@ -2,11 +2,6 @@
   "profiles": {
     "Cutie": {
       "commandName": "Project"
-    },
-    "启动VEGAS Pro": {
-      "commandName": "Executable",
-      "executablePath": "D:\\Program Files\\VEGAS\\VEGAS Pro 18.0\\vegas180.exe",
-      "commandLineArgs": "-CMDMODULE:\"D:\\code\\csharp\\VEGAS\\Cutie\\Cutie\\bin\\Debug\\net481\""
     }
   }
 }

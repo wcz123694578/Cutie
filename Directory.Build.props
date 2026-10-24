@@ -1,0 +1,4 @@
+<Project>
+  <!-- Machine-specific settings are written by Cutie.Launcher and ignored by Git. -->
+  <Import Project="$(MSBuildThisFileDirectory)Vegas.local.props" Condition="Exists('$(MSBuildThisFileDirectory)Vegas.local.props')" />
+</Project>
